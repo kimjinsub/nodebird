@@ -1,0 +1,28 @@
+{
+  "name": "nodebird-front",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next"
+  },
+  "author": "kim.js",
+  "license": "ISC",
+  "dependencies": {
+    "@ant-design/icons": "^4.7.0",
+    "antd": "^4.17.4",
+    "next": "^9.5.5",
+    "next-redux-wrapper": "^6.0.2",
+    "prop-types": "^15.7.2",
+    "react": "^16.14.0",
+    "react-dom": "^16.14.0",
+    "redux": "^4.1.2",
+    "styled-components": "^5.3.3"
+  },
+  "devDependencies": {
+    "eslint": "^8.5.0",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-react": "^7.27.1",
+    "eslint-plugin-react-hooks": "^4.3.0"
+  }
+}
