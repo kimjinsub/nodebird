@@ -37,7 +37,10 @@ export const initialState = {
     imagePaths: [],
     addPostLoading: false,
     addPostDone: false,
-    addPostError: null
+    addPostError: null,
+    addCommentLoading: false,
+    addCommentDone: false,
+    addCommentError: null
 }
 
 export const ADD_POST_REQUEST = 'ADD_POST_REQUEST';
