@@ -1,3 +1,5 @@
+import shortId from 'shortid';
+
 export const initialState = {
     mainPosts: [
         {
@@ -9,23 +11,28 @@ export const initialState = {
             content: '첫 번째 게시글 #해시태그 #익스프레스',
             Images: [
                 {
+                    id: shortId.generate(),
                     src: 'https://kimjinsub.github.io/meadowlark/public/img/logo.png'
                 },
                 {
+                    id: shortId.generate(),
                     src: 'https://kimjinsub.github.io/meadowlark/public/img/logo.png'
                 },
                 {
+                    id: shortId.generate(),
                     src: 'https://kimjinsub.github.io/meadowlark/public/img/logo.png'
                 }
             ],
             Comments: [
                 {
+                    id: shortId.generate(),
                     User: {
                         nickname: 'nero',
                     },
                     content: 'hi'
                 },
                 {
+                    id: shortId.generate(),
                     User: {
                         nickname: 'bero',
                     },
@@ -57,16 +64,24 @@ export const addComment = (data) => ({
     type: ADD_COMMENT_REQUEST,
     data
 })
-const dummyPost = {
-    id: 2,
-    content: 'dummy2',
+const dummyPost = (data) => ({
+    id: data.id,
+    content: data.content,
     User: {
         id: 1,
         nickname: 'kimjs'
     },
     Images: [],
     Comments: []
-}
+})
+const dummyComment = (data) => ({
+    id: shortId.generate(),
+    content: data,
+    User: {
+        id: 1,
+        nickname: 'kim.js'
+    }
+});
 const reducer = (state = initialState, action) => {
     switch (action.type) {
         case ADD_POST_REQUEST:
@@ -76,9 +91,10 @@ const reducer = (state = initialState, action) => {
                 addPostError: null
             }
         case ADD_POST_SUCCESS:
+            debugger;
             return {
                 ...state,
-                mainPosts: [dummyPost, ...state.mainPosts],
+                mainPosts: [dummyPost(action.data), ...state.mainPosts],
                 addPostLoading: false,
                 addPostDone: true
             }
@@ -91,15 +107,23 @@ const reducer = (state = initialState, action) => {
         case ADD_COMMENT_REQUEST:
             return {
                 ...state,
-                addCommentLoading: false,
+                addCommentLoading: true,
+                addCommentDone: false,
                 addCommentError: null
             }
-        case ADD_COMMENT_SUCCESS:
+        case ADD_COMMENT_SUCCESS: {
+            const postIndex = state.mainPosts.findIndex((v) => v.id === action.data.postId);
+            const post = { ...state.mainPosts[postIndex] };
+            post.Comments = [dummyComment(action.data.content), ...post.Comments];
+            const mainPosts = [...state.mainPosts];
+            mainPosts[postIndex] = post;
             return {
                 ...state,
+                mainPosts,
                 addCommentLoading: false,
                 addCommentDone: true
-            }
+            };
+        }
         case ADD_COMMENT_FAILURE:
             return {
                 ...state,

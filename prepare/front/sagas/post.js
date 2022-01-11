@@ -4,6 +4,8 @@ import {
     ADD_COMMENT_FAILURE, ADD_COMMENT_REQUEST, ADD_COMMENT_SUCCESS,
     ADD_POST_FAILURE, ADD_POST_REQUEST, ADD_POST_SUCCESS
 } from "../reducers/post";
+import shortId from 'shortid';
+import { ADD_POST_TO_ME } from "../reducers/user";
 
 function addPostAPI(data) {
     return axios.post('/api/post', data)
@@ -13,9 +15,17 @@ function* addPost(action) {
     try {
         // const result = yield call(addPostAPI, action.data);
         yield delay(1000);
+        const id = shortId.generate();
         yield put({
             type: ADD_POST_SUCCESS,
-            // data: result.data
+            data: {
+                id,
+                content: action.data
+            }
+        })
+        yield put({
+            type: ADD_POST_TO_ME,
+            data: id
         })
     } catch (err) {
         yield put({
@@ -34,7 +44,7 @@ function* addComment(action) {
         yield delay(1000);
         yield put({
             type: ADD_COMMENT_SUCCESS,
-            // data: result.data
+            data: action.data
         })
     } catch (err) {
         yield put({
