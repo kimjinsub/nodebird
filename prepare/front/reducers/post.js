@@ -1,48 +1,53 @@
-import shortId from 'shortid';
+import shortId, { generate } from 'shortid';
 import produce from 'immer';
+import faker from 'faker';
 
 export const initialState = {
     mainPosts: [
-        {
-            id: 1,
-            User: {
-                id: 1,
-                nickname: '제로초',
-            },
-            content: '첫 번째 게시글 #해시태그 #익스프레스',
-            Images: [
-                {
-                    id: shortId.generate(),
-                    src: 'https://kimjinsub.github.io/meadowlark/public/img/logo.png'
-                },
-                {
-                    id: shortId.generate(),
-                    src: 'https://kimjinsub.github.io/meadowlark/public/img/logo.png'
-                },
-                {
-                    id: shortId.generate(),
-                    src: 'https://kimjinsub.github.io/meadowlark/public/img/logo.png'
-                }
-            ],
-            Comments: [
-                {
-                    id: shortId.generate(),
-                    User: {
-                        nickname: 'nero',
-                    },
-                    content: 'hi'
-                },
-                {
-                    id: shortId.generate(),
-                    User: {
-                        nickname: 'bero',
-                    },
-                    content: 'bye'
-                }
-            ]
-        }
+        // {
+        //     id: 1,
+        //     User: {
+        //         id: 1,
+        //         nickname: '제로초',
+        //     },
+        //     content: '첫 번째 게시글 #해시태그 #익스프레스',
+        //     Images: [
+        //         {
+        //             id: shortId.generate(),
+        //             src: 'https://kimjinsub.github.io/meadowlark/public/img/logo.png'
+        //         },
+        //         {
+        //             id: shortId.generate(),
+        //             src: 'https://kimjinsub.github.io/meadowlark/public/img/logo.png'
+        //         },
+        //         {
+        //             id: shortId.generate(),
+        //             src: 'https://kimjinsub.github.io/meadowlark/public/img/logo.png'
+        //         }
+        //     ],
+        //     Comments: [
+        //         {
+        //             id: shortId.generate(),
+        //             User: {
+        //                 nickname: 'nero',
+        //             },
+        //             content: 'hi'
+        //         },
+        //         {
+        //             id: shortId.generate(),
+        //             User: {
+        //                 nickname: 'bero',
+        //             },
+        //             content: 'bye'
+        //         }
+        //     ]
+        // }
     ],
     imagePaths: [],
+    hasMorePost: true,
+    loadPostsLoading: false,
+    loadPostsDone: false,
+    loadPostsError: null,
     addPostLoading: false,
     addPostDone: false,
     addPostError: null,
@@ -54,6 +59,32 @@ export const initialState = {
     addCommentError: null
 }
 
+export const generateDummyPost = (number) => Array(number).fill().map(() => ({
+    id: shortId.generate(),
+    User: {
+        id: shortId.generate(),
+        nickname: faker.name.findName()
+    },
+    content: faker.lorem.paragraph(),
+    Images: [{
+        src: faker.image.image()
+    }],
+    Comments: [{
+        User: {
+            id: shortId.generate(),
+            nickname: faker.name.findName()
+        },
+        content: faker.lorem.sentence()
+    }]
+}));
+
+initialState.mainPosts = initialState.mainPosts.concat(
+    generateDummyPost(10)
+);
+
+export const LOAD_POSTS_REQUEST = 'LOAD_POSTS_REQUEST';
+export const LOAD_POSTS_SUCCESS = 'LOAD_POSTS_SUCCESS';
+export const LOAD_POSTS_FAILURE = 'LOAD_POSTS_FAILURE';
 export const ADD_POST_REQUEST = 'ADD_POST_REQUEST';
 export const ADD_POST_SUCCESS = 'ADD_POST_SUCCESS';
 export const ADD_POST_FAILURE = 'ADD_POST_FAILURE';
@@ -93,6 +124,20 @@ const dummyComment = (data) => ({
 const reducer = (state = initialState, action) => {
     return produce(state, (draft) => {
         switch (action.type) {
+            case LOAD_POSTS_REQUEST:
+                draft.loadPostsLoading = true;
+                draft.loadPostsLoading = false;
+                draft.loadPostsError = null;
+                break;
+            case LOAD_POSTS_SUCCESS:
+                draft.loadPostsLoading = false;
+                draft.loadPostsDone = true;
+                draft.mainPosts = action.data.concat(draft.mainPosts);
+                break;
+            case LOAD_POSTS_FAILURE:
+                draft.loadPostsLoading = false;
+                draft.loadPostsError = action.error;
+                break;
             case ADD_POST_REQUEST:
                 draft.addPostLoading = true;
                 draft.addPostLoading = false;
@@ -104,56 +149,52 @@ const reducer = (state = initialState, action) => {
                 draft.mainPosts.unshift(dummyPost(action.data));
                 break;
             case ADD_POST_FAILURE:
-                addPostLoading = false;
-                addPostError = action.error;
+                draft.addPostLoading = false;
+                draft.addPostError = action.error;
                 break;
             case REMOVE_POST_REQUEST:
-                return {
-                    ...state,
-                    removePostLoading: false,
-                    removePostError: null
-                }
+                draft.removePostLoading = true;
+                draft.removePostDone = false;
+                draft.removePostError = null;
+                break;
             case REMOVE_POST_SUCCESS:
-                return {
-                    ...state,
-                    mainPosts: state.mainPosts.filter((v) => v.id !== action.data),
-                    removePostLoading: false,
-                    removePostDone: true
-                }
+                draft.removePostLoading = false;
+                draft.removePostDone = true;
+                draft.mainPosts = draft.mainPosts.filter((v) => v.id !== action.data);
+                break;
             case REMOVE_POST_FAILURE:
-                return {
-                    ...state,
-                    removePostLoading: false,
-                    removePostError: action.error
-                }
+                draft.removePostLoading = false;
+                draft.removePostError = action.error;
+                break;
             case ADD_COMMENT_REQUEST:
-                return {
-                    ...state,
-                    addCommentLoading: true,
-                    addCommentDone: false,
-                    addCommentError: null
-                }
+                draft.addCommentLoading = true;
+                draft.addCommentDone = false;
+                draft.addCommentError = null;
+                break;
             case ADD_COMMENT_SUCCESS: {
-                const postIndex = state.mainPosts.findIndex((v) => v.id === action.data.postId);
-                const post = { ...state.mainPosts[postIndex] };
-                post.Comments = [dummyComment(action.data.content), ...post.Comments];
-                const mainPosts = [...state.mainPosts];
-                mainPosts[postIndex] = post;
-                return {
-                    ...state,
-                    mainPosts,
-                    addCommentLoading: false,
-                    addCommentDone: true
-                };
+                const post = draft.mainPosts.find((v) => v.id === action.data.postId);
+                post.Comments.unshift(dummyComment(action.data.content));
+                draft.addCommentLoading = false;
+                draft.addCommentDone = true;
+                break;
+                // const postIndex = state.mainPosts.findIndex((v) => v.id === action.data.postId);
+                // const post = { ...state.mainPosts[postIndex] };
+                // post.Comments = [dummyComment(action.data.content), ...post.Comments];
+                // const mainPosts = [...state.mainPosts];
+                // mainPosts[postIndex] = post;
+                // return {
+                //     ...state,
+                //     mainPosts,
+                //     addCommentLoading: false,
+                //     addCommentDone: true
+                // };
             }
             case ADD_COMMENT_FAILURE:
-                return {
-                    ...state,
-                    addCommentLoading: false,
-                    addCommentError: action.error
-                }
+                draft.addCommentLoading = false;
+                draft.addCommentError = action.error;
+                break;
             default:
-                return state;
+                break;
         }
     })
 }
