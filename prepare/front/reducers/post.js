@@ -44,7 +44,7 @@ export const initialState = {
         // }
     ],
     imagePaths: [],
-    hasMorePost: true,
+    hasMorePosts: true,
     loadPostsLoading: false,
     loadPostsDone: false,
     loadPostsError: null,
@@ -78,9 +78,9 @@ export const generateDummyPost = (number) => Array(number).fill().map(() => ({
     }]
 }));
 
-initialState.mainPosts = initialState.mainPosts.concat(
-    generateDummyPost(10)
-);
+// initialState.mainPosts = initialState.mainPosts.concat(
+//     generateDummyPost(10)
+// );
 
 export const LOAD_POSTS_REQUEST = 'LOAD_POSTS_REQUEST';
 export const LOAD_POSTS_SUCCESS = 'LOAD_POSTS_SUCCESS';
@@ -126,13 +126,14 @@ const reducer = (state = initialState, action) => {
         switch (action.type) {
             case LOAD_POSTS_REQUEST:
                 draft.loadPostsLoading = true;
-                draft.loadPostsLoading = false;
+                draft.loadPostsDone = false;
                 draft.loadPostsError = null;
                 break;
             case LOAD_POSTS_SUCCESS:
                 draft.loadPostsLoading = false;
                 draft.loadPostsDone = true;
                 draft.mainPosts = action.data.concat(draft.mainPosts);
+                draft.hasMorePosts = draft.mainPosts.length < 50;
                 break;
             case LOAD_POSTS_FAILURE:
                 draft.loadPostsLoading = false;
@@ -140,7 +141,7 @@ const reducer = (state = initialState, action) => {
                 break;
             case ADD_POST_REQUEST:
                 draft.addPostLoading = true;
-                draft.addPostLoading = false;
+                draft.addPostDone = false;
                 draft.addPostError = null;
                 break;
             case ADD_POST_SUCCESS:
