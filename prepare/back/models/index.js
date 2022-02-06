@@ -12,6 +12,12 @@ const db = {};
 
 const sequelize = new Sequelize(config.database, config.username, config.password, config);
 
+db.Comment = require('./comment')(sequelize, Sequelize);
+db.Hashtag = require('./hashtag')(sequelize, Sequelize);
+db.Image = require('./image')(sequelize, Sequelize);
+db.Post = require('./post')(sequelize, Sequelize);
+db.User = require('./user')(sequelize, Sequelize);
+
 // let sequelize;
 // if (config.use_env_variable) {
 //   sequelize = new Sequelize(process.env[config.use_env_variable], config);
@@ -29,11 +35,11 @@ const sequelize = new Sequelize(config.database, config.username, config.passwor
 //     db[model.name] = model;
 //   });
 
-// Object.keys(db).forEach(modelName => {
-//   if (db[modelName].associate) {
-//     db[modelName].associate(db);
-//   }
-// });
+Object.keys(db).forEach(modelName => {
+  if (db[modelName].associate) {
+    db[modelName].associate(db);
+  }
+});
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
