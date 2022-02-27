@@ -1,13 +1,25 @@
 const express = require('express');
+const cors = require('cors');
 const postRouter = require('./routes/post');
+const userRouter = require('./routes/user');
 const db = require('./models');
+const passportConfig = require('./passport');
+
 const app = express();
 db.sequelize.sync()
     .then(() => {
         console.log('db 연결 성공');
     })
     .catch(console.error);
-    
+passportConfig();
+
+app.use(cors({
+    origin: true,
+    // origin: '*',
+}));
+app.use(express.json());// 요청시 json으로 데이터를 보낼때
+app.use(express.urlencoded({ extended: true }));// 요청시 form submit으로 데이터를 보낼때 urlencoded방식으로 넘어오는것을 처리
+
 app.get('/', (req, res) => {
     res.send('hello express');
 })
@@ -25,9 +37,10 @@ app.get('/api/posts', (req, res) => {
 });
 
 app.use('/post', postRouter);
+app.use('/user', userRouter);
 
 app.listen(3065, () => {
-    console.log('서버 실행 중');
+    console.log('서버 실행 중!');
 });
 // const http = require('http');
 // const server = http.createServer((req, res) => {
